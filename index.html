@@ -774,6 +774,7 @@ const CATEGORIES = [
   {
     id: 'tools', label: 'The Tools', num: 1,
     color: '#3B82F6', bg: '#EFF6FF',
+    hint: 'Self-assess your current ability to use each AI tool.',
     items: [
       { id: 'llm',      label: 'LLM',       sub: 'Gemini' },
       { id: 'research', label: 'Research',   sub: 'NotebookLM' },
@@ -784,6 +785,7 @@ const CATEGORIES = [
   {
     id: 'levels', label: 'The Levels', num: 2,
     color: '#0EA5E9', bg: '#F0F9FF',
+    hint: 'Self-assess how far you\'ve progressed along the proficiency spectrum.',
     items: [
       { id: 'beachcomber', label: 'Beachcomber', sub: 'Exposure' },
       { id: 'swimmer',     label: 'Swimmer',     sub: 'Productivity' },
@@ -794,6 +796,7 @@ const CATEGORIES = [
   {
     id: 'principles', label: 'The Principles', num: 3,
     color: '#8B5CF6', bg: '#F5F3FF',
+    hint: 'Self-assess how consistently you apply each growth principle.',
     items: [
       { id: 'esct',    label: 'E.S.C.T. Cycle',   sub: 'Exponential' },
       { id: 'levelUp', label: 'Level Up',           sub: 'Growth Mindset' },
@@ -804,6 +807,7 @@ const CATEGORIES = [
   {
     id: 'domains', label: 'The Domains', num: 4,
     color: '#F59E0B', bg: '#FFFBEB',
+    hint: 'Self-assess how actively you\'re applying AI in each area of your life.',
     items: [
       { id: 'personal',     label: 'Personal',     sub: 'Workflow' },
       { id: 'academic',     label: 'Academic',     sub: 'Student' },
@@ -1245,7 +1249,10 @@ function renderAssessment() {
     section.innerHTML = `
       <div class="cat-section-header" style="background:${cat.bg}; border-color:${cat.color}40;">
         <div class="cat-num" style="background:${cat.color}">${cat.num}</div>
-        <h3 style="color:${cat.color}">${cat.label}</h3>
+        <div>
+          <h3 style="color:${cat.color}">${cat.label}</h3>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;font-style:italic">${cat.hint}</div>
+        </div>
       </div>
       <div class="cat-section-body">
         ${itemRows}

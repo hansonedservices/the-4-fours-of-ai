@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The 4 Fours — AI Growth Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --tools:       #3B82F6;
+      --tools-bg:    #EFF6FF;
+      --tools-mid:   #BFDBFE;
+      --levels:      #0EA5E9;
+      --levels-bg:   #F0F9FF;
+      --levels-mid:  #BAE6FD;
+      --principles:  #8B5CF6;
+      --principles-bg: #F5F3FF;
+      --principles-mid: #DDD6FE;
+      --domains:     #F59E0B;
+      --domains-bg:  #FFFBEB;
+      --domains-mid: #FDE68A;
+      --bg:          #F1F5F9;
+      --surf:        #FFFFFF;
+      --surf2:       #F8FAFC;
+      --border:      #E2E8F0;
+      --border-dark: #CBD5E1;
+      --text:        #1E293B;
+      --muted:       #64748B;
+      --accent:      #6C63FF;
+      --accent-bg:   #EEF2FF;
+      --green:       #10B981;
+      --red:         #EF4444;
+      --radius:      14px;
+      --r-sm:        8px;
+      --shadow:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    #app-header {
+      background: var(--surf);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: 62px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+      color: var(--text);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-badge { display: flex; gap: 3px; }
+    .logo-badge span { width: 10px; height: 10px; border-radius: 3px; }
+    #nav { display: flex; gap: 2px; flex: 1; }
+    #nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 7px 15px;
+      border-radius: var(--r-sm);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    #nav button:hover { color: var(--text); background: var(--bg); }
+    #nav button.active { color: var(--accent); background: var(--accent-bg); font-weight: 600; }
+    #client-badge {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    #client-badge strong { color: var(--text); }
+    #client-badge button {
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.15s;
+    }
+    #client-badge button:hover { color: var(--text); border-color: var(--border-dark); }
+
+    /* ── MAIN ── */
+    main { padding: 28px 24px; max-width: 1100px; margin: 0 auto; }
+
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── LOGIN PAGE ── */
+    #view-login { max-width: 900px; margin: 0 auto; padding-top: 20px; }
+
+    .hero {
+      text-align: center;
+      padding: 36px 20px 28px;
+      background: linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 50%, #FFF7ED 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      margin-bottom: 28px;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+    }
+    .hero h1 { font-size: 2rem; font-weight: 800; line-height: 1.2; margin-bottom: 10px; color: var(--text); }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p { color: var(--muted); font-size: 0.95rem; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+    .framework-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 720px) { .framework-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 420px) { .framework-grid { grid-template-columns: 1fr; } }
+
+    .fw-card { background: var(--surf); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; box-shadow: var(--shadow); }
+    .fw-card-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+    .fw-num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .fw-card-head h3 { font-size: 0.88rem; font-weight: 800; margin-bottom: 1px; }
+    .fw-card-head p { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+    .fw-icon { width: 48px; height: 48px; margin-bottom: 6px; display: block; }
+    .fw-items { padding: 10px 0; }
+    .fw-item { display: flex; align-items: center; gap: 8px; padding: 5px 14px; font-size: 0.78rem; }
+    .fw-item-emoji { font-size: 1rem; line-height: 1; flex-shrink: 0; width: 22px; text-align: center; }
+    .fw-item-text strong { display: block; font-weight: 600; color: var(--text); font-size: 0.78rem; }
+    .fw-item-text span { color: var(--muted); font-size: 0.71rem; }
+
+    .login-section { background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; box-shadow: var(--shadow); }
+    .login-section h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+    .login-section > p { color: var(--muted); font-size: 0.875rem; margin-bottom: 22px; }
+    .login-row { display: flex; gap: 10px; align-items: flex-end; }
+    .login-row .field { flex: 1; margin-bottom: 0; }
+
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .field label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .field input {
+      background: var(--surf2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+    }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.1); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn:hover { background: #5851e8; }
+    .btn:active { transform: scale(0.98); }
+    .btn-sm { padding: 7px 14px; font-size: 0.83rem; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+    .btn-outline:hover { background: var(--surf2); border-color: var(--border-dark); color: var(--text); }
+
+    .divider { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 20px 0; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: var(--border); }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    #existing-clients { display: flex; flex-direction: column; gap: 7px; max-height: 260px; overflow-y: auto; }
+    .client-item { display: flex; align-items: center; justify-content: space-between; background: var(--surf2); border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px; cursor: pointer; transition: all 0.15s; }
+    .client-item:hover { border-color: var(--accent); background: var(--accent-bg); }
+    .client-item .ci-name { font-weight: 600; font-size: 0.9rem; }
+    .client-item .ci-meta { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+    .ci-count { font-size: 0.75rem; color: var(--muted); background: var(--border); padding: 2px 9px; border-radius: 99px; white-space: nowrap; }
+
+    /* ── CARDS / LAYOUT ── */
+    .card { background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+    .card h3 { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin-bottom: 16px; }
+    .chart-wrap { position: relative; height: 250px; }
+    .chart-wrap-tall { position: relative; height: 300px; }
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media (max-width: 680px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    /* ── CAT STAT BARS ── */
+    .cat-stats { display: flex; flex-direction: column; gap: 14px; padding-top: 2px; }
+    .cat-stat-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .cat-stat-label { font-size: 0.84rem; font-weight: 600; }
+    .cat-stat-val { font-size: 0.8rem; color: var(--muted); }
+    .bar-track { height: 8px; background: var(--surf2); border-radius: 99px; overflow: hidden; border: 1px solid var(--border); }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+    .trend-badge { font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; margin-left: 5px; }
+
+    /* ── OVERVIEW ROW ── */
+    .overview-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+    @media (max-width: 680px) { .overview-row { grid-template-columns: 1fr 1fr; } }
+    .overview-card {
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 14px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border-top: 3px solid var(--c);
+    }
+    .overview-card .ov-num { font-size: 2rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+    .overview-card .ov-cat { font-size: 0.72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .overview-card .ov-level { font-size: 0.75rem; font-weight: 700; margin-top: 6px; padding: 2px 8px; border-radius: 99px; display: inline-block; }
+
+    /* ── INSIGHTS ── */
+    .insights-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media (max-width: 680px) { .insights-row { grid-template-columns: 1fr; } }
+    .insight-list { display: flex; flex-direction: column; gap: 7px; }
+    .insight-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-radius: var(--r-sm); border: 1px solid var(--border); background: var(--surf2); gap: 10px; }
+    .ii-label { font-size: 0.83rem; font-weight: 600; }
+    .ii-sub { font-size: 0.72rem; margin-top: 1px; }
+    .ii-badge { font-weight: 700; font-size: 0.78rem; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+    .insight-empty { color: var(--muted); font-size: 0.82rem; padding: 8px 0; }
+
+    /* ── RECENT LIST ── */
+    .recent-list { display: flex; flex-direction: column; gap: 8px; }
+    .recent-item { background: var(--surf2); border-radius: var(--r-sm); border: 1.5px solid var(--border); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; overflow: hidden; }
+    .recent-item:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .recent-item.expanded { border-color: var(--accent); }
+    .ri-top { display: flex; justify-content: space-between; align-items: center; padding: 9px 14px; font-size: 0.84rem; gap: 10px; }
+    .ri-left { display: flex; flex-direction: column; gap: 2px; }
+    .ri-date { color: var(--muted); font-size: 0.8rem; }
+    .ri-toggle { font-size: 0.72rem; color: var(--accent); font-weight: 600; white-space: nowrap; }
+    .ri-scores { display: flex; gap: 6px; }
+    .ri-dot { padding: 2px 9px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+    .ri-detail { display: none; border-top: 1px solid var(--border); padding: 14px 14px 12px; }
+    .recent-item.expanded .ri-detail { display: block; }
+    .ri-notes { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .ri-note { font-size: 0.8rem; padding: 6px 10px; border-radius: 6px; line-height: 1.4; }
+    .ri-note-label { font-weight: 700; margin-right: 5px; }
+    .ri-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 500px) { .ri-cats { grid-template-columns: 1fr; } }
+    .ri-cat-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .ri-cat-items { display: flex; flex-direction: column; gap: 4px; }
+    .ri-cat-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; }
+    .ri-cat-item-label { color: var(--muted); }
+    .ri-cat-item-val { font-weight: 700; padding: 1px 7px; border-radius: 4px; font-size: 0.72rem; }
+    .ri-cat-note { font-size: 0.75rem; padding: 5px 8px; border-radius: 5px; margin-top: 6px; line-height: 1.4; }
+
+    /* ── NO DATA ── */
+    .no-data { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 0.9rem; }
+    .no-data h4 { font-size: 1.05rem; color: var(--text); margin-bottom: 8px; font-weight: 700; }
+
+    /* ── ASSESSMENT ── */
+    .assess-header { margin-bottom: 20px; }
+    .assess-header h2 { font-size: 1.35rem; font-weight: 800; }
+    .assess-header p { color: var(--muted); font-size: 0.875rem; margin-top: 5px; }
+    .progress-bar-wrap { margin-top: 16px; }
+    .progress-bar-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
+    .progress-label { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+
+    /* Scale legend */
+    .scale-legend {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+      background: var(--surf);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      margin-bottom: 18px;
+    }
+    .scale-legend-title { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-right: 4px; }
+    .scale-legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 600; }
+    .legend-swatch { width: 22px; height: 8px; border-radius: 3px; }
+
+    .cat-section { margin-bottom: 20px; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    .cat-section-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .cat-num { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem; color: #fff; flex-shrink: 0; }
+    .cat-section-header h3 { font-size: 0.98rem; font-weight: 700; }
+    .cat-section-body { background: var(--surf); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); }
+
+    .item-row {
+      display: grid;
+      grid-template-columns: 155px 1fr;
+      align-items: start;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-label { font-size: 0.875rem; font-weight: 600; }
+    .item-sub { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── SCORE STRIP ── */
+    .score-strip-wrap { display: flex; flex-direction: column; gap: 0; }
+    .score-strip { display: flex; gap: 3px; }
+    .score-btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 5px;
+      border: 1.5px solid var(--border);
+      background: var(--surf2);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: all 0.12s;
+      font-family: inherit;
+      line-height: 1;
+    }
+    .score-btn:hover { border-color: var(--zone-color, var(--border-dark)); color: var(--text); transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
+    .score-btn.selected { background: var(--zone-color); color: #fff; border-color: var(--zone-color); }
+    .score-btn.zone-start { margin-left: 5px; }
+
+    /* ── CONFIDENCE ── */
+    .confidence-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 7px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      min-height: 24px;
+    }
+    .confidence-row.visible { opacity: 1; pointer-events: auto; }
+    .conf-label { font-size: 0.7rem; color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .conf-btn {
+      padding: 2px 9px;
+      border-radius: 99px;
+      border: 1.5px solid var(--border);
+      background: var(--surf2);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 600;
+      transition: all 0.12s;
+      font-family: inherit;
+    }
+    .conf-btn:hover { border-color: var(--border-dark); color: var(--text); }
+    .conf-btn.selected-low    { background: #FEF3C7; border-color: #F59E0B; color: #92400E; }
+    .conf-btn.selected-medium { background: #E0F2FE; border-color: #0284C7; color: #0369A1; }
+    .conf-btn.selected-high   { background: #ECFDF5; border-color: #10B981; color: #065F46; }
+
+    /* ── PER-CAT NOTES ── */
+    .cat-notes-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      cursor: pointer;
+      background: var(--surf2);
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 600;
+      transition: background 0.12s;
+      border-top: 1px solid var(--border);
+      user-select: none;
+    }
+    .cat-notes-toggle:hover { background: var(--bg); color: var(--text); }
+    .cnt-arrow { margin-left: auto; }
+    .cat-notes-panel { display: none; border-top: 1px solid var(--border); padding: 14px 18px; background: var(--surf2); gap: 12px; }
+    .cat-notes-panel.open { display: grid; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 600px) { .cat-notes-panel.open { grid-template-columns: 1fr; } }
+    .cat-note-box { display: flex; flex-direction: column; gap: 5px; }
+    .cat-note-box label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 5px; }
+    .cat-note-box textarea {
+      width: 100%;
+      background: var(--surf);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      outline: none;
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+      transition: border 0.15s;
+    }
+    .cat-note-box.progress textarea:focus { border-color: #10B981; }
+    .cat-note-box.stuck textarea:focus { border-color: #F59E0B; }
+
+    /* Overall notes */
+    .assess-notes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 600px) { .assess-notes { grid-template-columns: 1fr; } }
+    .assess-note-box { background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+    .assess-note-box.progress { border-top: 3px solid #10B981; }
+    .assess-note-box.stuck    { border-top: 3px solid #F59E0B; }
+    .assess-note-box label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .assess-note-box.progress label { color: #10B981; }
+    .assess-note-box.stuck    label { color: #F59E0B; }
+    .note-desc { font-size: 0.75rem; color: var(--muted); margin-bottom: 10px; }
+    .assess-note-box textarea {
+      width: 100%;
+      background: var(--surf2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-size: 0.875rem;
+      padding: 9px 12px;
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .assess-note-box.progress textarea:focus { border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    .assess-note-box.stuck    textarea:focus { border-color: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,0.1); }
+    .section-divider { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 10px; }
+    .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .assess-actions { display: flex; gap: 10px; align-items: center; }
+    .required-note { font-size: 0.8rem; color: var(--muted); margin-left: auto; }
+
+    /* ── HISTORY ── */
+    .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    @media (max-width: 680px) { .history-grid { grid-template-columns: 1fr; } }
+    .history-list { display: flex; flex-direction: column; gap: 9px; }
+    .history-card { background: var(--surf); border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 20px; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); }
+    .history-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); }
+    .history-card.expanded { border-color: var(--accent); }
+    .hc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .hc-date { font-size: 0.85rem; font-weight: 700; }
+    .hc-notes { font-size: 0.78rem; color: var(--muted); margin-top: 3px; font-style: italic; }
+    .hc-scores { display: flex; gap: 5px; flex-shrink: 0; }
+    .score-chip { padding: 3px 9px; border-radius: 99px; font-size: 0.73rem; font-weight: 700; color: #fff; }
+    .hc-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); display: none; }
+    .history-card.expanded .hc-detail { display: block; }
+    .hc-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 500px) { .hc-cats { grid-template-columns: 1fr; } }
+    .hc-cat h4 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .hc-items { display: flex; flex-direction: column; gap: 5px; }
+    .hc-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+    .hc-item-label { color: var(--muted); }
+    .hc-item-val { font-weight: 700; padding: 1px 8px; border-radius: 4px; font-size: 0.73rem; }
+    .hc-conf { font-size: 0.68rem; font-weight: 600; padding: 1px 5px; border-radius: 3px; margin-left: 4px; }
+    .hc-cat-note { font-size: 0.75rem; padding: 5px 8px; border-radius: 5px; margin-top: 8px; line-height: 1.4; }
+
+    /* ── PAGE HEADERS ── */
+    .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--surf);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 11px 18px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      transform: translateY(12px);
+      opacity: 0;
+      transition: all 0.22s;
+      z-index: 999;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.success { border-color: var(--green); color: var(--green); }
+    #toast.error   { border-color: var(--red);   color: var(--red);   }
+
+    @media (max-width: 600px) {
+      .item-row { grid-template-columns: 1fr; }
+      main { padding: 20px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-header" style="display:none;">
+  <div class="logo">
+    <div class="logo-badge">
+      <span style="background:var(--tools)"></span>
+      <span style="background:var(--levels)"></span>
+      <span style="background:var(--principles)"></span>
+      <span style="background:var(--domains)"></span>
+    </div>
+    The 4 Fours
+  </div>
+  <nav id="nav">
+    <button data-view="dashboard">Dashboard</button>
+    <button data-view="assessment">New Assessment</button>
+    <button data-view="history">History</button>
+  </nav>
+  <div id="client-badge">
+    <span>Client: <strong id="client-name-display"></strong></span>
+    <button id="switch-client-btn">Switch</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ══ LOGIN ══ -->
+  <div id="view-login" class="view active">
+    <div class="hero">
+      <div class="hero-tag">AI for Everyone</div>
+      <h1>The <em>4 Fours</em> of AI</h1>
+      <p>A practical learning structure for building real AI fluency — tracking your growth across four essential dimensions.</p>
+    </div>
+
+    <div class="framework-grid">
+      <div class="fw-card">
+        <div class="fw-card-head" style="background:var(--tools-bg); border-color:var(--tools-mid);">
+          <div class="fw-num" style="background:var(--tools)">1</div>
+          <svg class="fw-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="32" height="26" rx="4" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1.5"/>
+            <rect x="2" y="5" width="32" height="9" rx="4" fill="#3B82F6"/>
+            <circle cx="8" cy="9.5" r="1.5" fill="white"/>
+            <circle cx="13" cy="9.5" r="1.5" fill="white"/>
+            <circle cx="18" cy="9.5" r="1.5" fill="white"/>
+            <polyline points="10,20 7,23 10,26" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <polyline points="22,20 25,23 22,26" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <line x1="19" y1="18" x2="15" y2="28" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <h3 style="color:var(--tools)">The Tools</h3>
+          <p>What you use</p>
+        </div>
+        <div class="fw-items">
+          <div class="fw-item"><span class="fw-item-emoji">💬</span><div class="fw-item-text"><strong>LLM</strong><span>Gemini</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">📓</span><div class="fw-item-text"><strong>Research</strong><span>NotebookLM</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🧩</span><div class="fw-item-text"><strong>Custom AI</strong><span>Gems / AI Studio / CLI</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">📋</span><div class="fw-item-text"><strong>Workflow</strong><span>Google Workspace</span></div></div>
+        </div>
+      </div>
+
+      <div class="fw-card">
+        <div class="fw-card-head" style="background:var(--levels-bg); border-color:var(--levels-mid);">
+          <div class="fw-num" style="background:var(--levels)">2</div>
+          <svg class="fw-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="32" height="10" rx="3" fill="#BAE6FD"/>
+            <rect x="2" y="12" width="32" height="8" fill="#38BDF8"/>
+            <rect x="2" y="20" width="32" height="7" fill="#0284C7"/>
+            <rect x="2" y="27" width="32" height="7" rx="3" fill="#075985"/>
+            <path d="M2 12 Q11 8 18 12 Q25 16 34 12" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <ellipse cx="22" cy="14" rx="5" ry="2" fill="white" opacity="0.5"/>
+            <ellipse cx="18" cy="30" rx="5" ry="2" fill="white" opacity="0.35"/>
+          </svg>
+          <h3 style="color:var(--levels)">The Levels</h3>
+          <p>Proficiency spectrum</p>
+        </div>
+        <div class="fw-items">
+          <div class="fw-item"><span class="fw-item-emoji">🏖️</span><div class="fw-item-text"><strong>Beachcomber</strong><span>Exposure</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🏊</span><div class="fw-item-text"><strong>Swimmer</strong><span>Productivity</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🤿</span><div class="fw-item-text"><strong>Snorkeler</strong><span>Understanding</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🔵</span><div class="fw-item-text"><strong>Diver</strong><span>Mastery</span></div></div>
+        </div>
+      </div>
+
+      <div class="fw-card">
+        <div class="fw-card-head" style="background:var(--principles-bg); border-color:var(--principles-mid);">
+          <div class="fw-num" style="background:var(--principles)">3</div>
+          <svg class="fw-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="14" cy="20" r="7" stroke="#8B5CF6" stroke-width="2" fill="#DDD6FE"/>
+            <circle cx="14" cy="20" r="2.5" fill="#8B5CF6"/>
+            <rect x="12.5" y="10" width="3" height="4" rx="1" fill="#8B5CF6"/>
+            <rect x="12.5" y="26" width="3" height="4" rx="1" fill="#8B5CF6"/>
+            <rect x="4" y="18.5" width="4" height="3" rx="1" fill="#8B5CF6"/>
+            <rect x="20" y="18.5" width="4" height="3" rx="1" fill="#8B5CF6"/>
+            <rect x="6.5" y="12.5" width="3" height="4" rx="1" fill="#8B5CF6" transform="rotate(45 8 14.5)"/>
+            <rect x="19" y="20" width="3" height="4" rx="1" fill="#8B5CF6" transform="rotate(45 20.5 22)"/>
+            <circle cx="25" cy="12" r="4.5" stroke="#8B5CF6" stroke-width="1.5" fill="#EDE9FE"/>
+            <circle cx="25" cy="12" r="1.5" fill="#8B5CF6"/>
+            <rect x="23.5" y="6" width="3" height="2.5" rx="1" fill="#8B5CF6"/>
+            <rect x="23.5" y="15.5" width="3" height="2.5" rx="1" fill="#8B5CF6"/>
+            <rect x="19" y="10.5" width="2.5" height="3" rx="1" fill="#8B5CF6"/>
+            <rect x="29.5" y="10.5" width="2.5" height="3" rx="1" fill="#8B5CF6"/>
+          </svg>
+          <h3 style="color:var(--principles)">The Principles</h3>
+          <p>How you grow</p>
+        </div>
+        <div class="fw-items">
+          <div class="fw-item"><span class="fw-item-emoji">🔄</span><div class="fw-item-text"><strong>E.S.C.T. Cycle</strong><span>Exponential growth</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">📈</span><div class="fw-item-text"><strong>Level Up</strong><span>Growth mindset</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">⚖️</span><div class="fw-item-text"><strong>Ethical Skepticism</strong><span>Critique</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🕹️</span><div class="fw-item-text"><strong>Agency</strong><span>Human-in-the-Loop</span></div></div>
+        </div>
+      </div>
+
+      <div class="fw-card">
+        <div class="fw-card-head" style="background:var(--domains-bg); border-color:var(--domains-mid);">
+          <div class="fw-num" style="background:var(--domains)">4</div>
+          <svg class="fw-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2"  y="2"  width="14" height="14" rx="3" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/>
+            <rect x="20" y="2"  width="14" height="14" rx="3" fill="#FCD34D" stroke="#F59E0B" stroke-width="1.5"/>
+            <rect x="2"  y="20" width="14" height="14" rx="3" fill="#FCD34D" stroke="#F59E0B" stroke-width="1.5"/>
+            <rect x="20" y="20" width="14" height="14" rx="3" fill="#FDE68A" stroke="#F59E0B" stroke-width="1.5"/>
+            <line x1="6"  y1="8"  x2="12" y2="8"  stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="6"  y1="11" x2="10" y2="11" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/>
+            <polygon points="27,6 33,9 27,12 21,9" fill="#F59E0B"/>
+            <line x1="6"  y1="26" x2="9"  y2="29" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="12" y1="26" x2="9"  y2="29" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="27" cy="27" r="4" fill="#F59E0B"/>
+            <circle cx="27" cy="27" r="2" fill="#FFFBEB"/>
+          </svg>
+          <h3 style="color:var(--domains)">The Domains</h3>
+          <p>Where you apply it</p>
+        </div>
+        <div class="fw-items">
+          <div class="fw-item"><span class="fw-item-emoji">🗓️</span><div class="fw-item-text"><strong>Personal</strong><span>Workflow</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🎓</span><div class="fw-item-text"><strong>Academic</strong><span>Student</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🤝</span><div class="fw-item-text"><strong>Professional</strong><span>Client</span></div></div>
+          <div class="fw-item"><span class="fw-item-emoji">🎨</span><div class="fw-item-text"><strong>Creative</strong><span>Artistry</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-section">
+      <h2>Track Your Progress</h2>
+      <p>Create a unique login for privacy. Returning clients continue where they left off — new logins create a fresh profile automatically.</p>
+      <div class="login-row">
+        <div class="field">
+          <label>Login</label>
+          <input type="text" id="new-client-input" placeholder="Enter your unique login…" autocomplete="off" />
+        </div>
+        <button class="btn" id="start-btn">Track My Progress →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div id="view-dashboard" class="view">
+    <div class="flex-between">
+      <h2 class="section-title" id="dash-title">Dashboard</h2>
+      <button class="btn btn-sm" data-view="assessment">+ New Assessment</button>
+    </div>
+
+    <div id="dash-no-data" class="card no-data" style="display:none;">
+      <h4>No assessments yet</h4>
+      <p>Take your first self-assessment to start tracking your AI growth journey.</p>
+      <br/>
+      <button class="btn" data-view="assessment">Start First Assessment →</button>
+    </div>
+
+    <div id="dash-content">
+      <div class="overview-row" id="overview-row"></div>
+      <div class="dash-grid">
+        <div class="card">
+          <h3>Current Snapshot</h3>
+          <div class="chart-wrap"><canvas id="radar-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Category Averages</h3>
+          <div class="cat-stats" id="cat-stats"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:18px;">
+        <h3>Progress Over Time</h3>
+        <div class="chart-wrap-tall"><canvas id="trend-chart"></canvas></div>
+      </div>
+      <div class="insights-row" id="insights-row"></div>
+      <div class="card">
+        <h3>Recent Assessments</h3>
+        <div class="recent-list" id="recent-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ASSESSMENT ══ -->
+  <div id="view-assessment" class="view">
+    <div class="assess-header">
+      <h2>New Assessment</h2>
+      <p>Rate each area 1–10. Confidence is optional — it helps track certainty, not just skill.</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="assess-progress" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="assess-progress-label">0 of 16 rated</div>
+      </div>
+    </div>
+
+    <div class="scale-legend">
+      <span class="scale-legend-title">Scale</span>
+      <div class="scale-legend-item"><div class="legend-swatch" style="background:#94A3B8"></div>1–2 🏖️ Beachcomber</div>
+      <div class="scale-legend-item"><div class="legend-swatch" style="background:#0EA5E9"></div>3–5 🏊 Swimmer</div>
+      <div class="scale-legend-item"><div class="legend-swatch" style="background:#0284C7"></div>6–8 🤿 Snorkeler</div>
+      <div class="scale-legend-item"><div class="legend-swatch" style="background:#075985"></div>9–10 🔵 Diver</div>
+    </div>
+
+    <div id="assess-form"></div>
+
+    <div class="section-divider">Overall Session Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+    <div class="assess-notes">
+      <div class="assess-note-box progress">
+        <label>✅ Progress</label>
+        <div class="note-desc">Wins, breakthroughs, habits forming across the session.</div>
+        <textarea id="notes-progress" placeholder="What's clicking? What have you made progress on?"></textarea>
+      </div>
+      <div class="assess-note-box stuck">
+        <label>🔄 Stuck</label>
+        <div class="note-desc">Blockers, confusion, or areas to revisit across the session.</div>
+        <textarea id="notes-stuck" placeholder="Where are you hitting friction or feeling uncertain?"></textarea>
+      </div>
+    </div>
+    <div class="assess-actions">
+      <button class="btn" id="submit-assess-btn">Save Assessment</button>
+      <button class="btn btn-outline" id="clear-assess-btn">Clear All</button>
+      <span class="required-note" id="required-note"></span>
+    </div>
+  </div>
+
+  <!-- ══ HISTORY ══ -->
+  <div id="view-history" class="view">
+    <div class="flex-between">
+      <h2 class="section-title">Assessment History</h2>
+    </div>
+    <div class="history-grid">
+      <div class="card">
+        <h3>Growth Trends</h3>
+        <div class="chart-wrap-tall"><canvas id="history-trend-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Detailed Breakdown (Latest)</h3>
+        <div class="chart-wrap-tall"><canvas id="bar-chart"></canvas></div>
+      </div>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const CATEGORIES = [
+  {
+    id: 'tools', label: 'The Tools', num: 1,
+    color: '#3B82F6', bg: '#EFF6FF',
+    items: [
+      { id: 'llm',      label: 'LLM',       sub: 'Gemini' },
+      { id: 'research', label: 'Research',   sub: 'NotebookLM' },
+      { id: 'customAI', label: 'Custom AI',  sub: 'Gems / AI Studio / CLI' },
+      { id: 'workflow', label: 'Workflow',   sub: 'Google Workspace' },
+    ]
+  },
+  {
+    id: 'levels', label: 'The Levels', num: 2,
+    color: '#0EA5E9', bg: '#F0F9FF',
+    items: [
+      { id: 'beachcomber', label: 'Beachcomber', sub: 'Exposure' },
+      { id: 'swimmer',     label: 'Swimmer',     sub: 'Productivity' },
+      { id: 'snorkeler',   label: 'Snorkeler',   sub: 'Understanding' },
+      { id: 'diver',       label: 'Diver',       sub: 'Mastery' },
+    ]
+  },
+  {
+    id: 'principles', label: 'The Principles', num: 3,
+    color: '#8B5CF6', bg: '#F5F3FF',
+    items: [
+      { id: 'esct',    label: 'E.S.C.T. Cycle',   sub: 'Exponential' },
+      { id: 'levelUp', label: 'Level Up',           sub: 'Growth Mindset' },
+      { id: 'ethical', label: 'Ethical Skepticism', sub: 'Critique' },
+      { id: 'agency',  label: 'Agency',             sub: 'Human-in-the-Loop' },
+    ]
+  },
+  {
+    id: 'domains', label: 'The Domains', num: 4,
+    color: '#F59E0B', bg: '#FFFBEB',
+    items: [
+      { id: 'personal',     label: 'Personal',     sub: 'Workflow' },
+      { id: 'academic',     label: 'Academic',     sub: 'Student' },
+      { id: 'professional', label: 'Professional', sub: 'Client' },
+      { id: 'creative',     label: 'Creative',     sub: 'Artistry' },
+    ]
+  }
+];
+
+// Zone definitions for 1-10 scale
+const ZONES = [
+  { label: 'Beachcomber', emoji: '🏖️', color: '#94A3B8', bg: '#F8FAFC' },
+  { label: 'Swimmer',     emoji: '🏊', color: '#0EA5E9', bg: '#F0F9FF' },
+  { label: 'Snorkeler',   emoji: '🤿', color: '#0284C7', bg: '#E0F2FE' },
+  { label: 'Diver',       emoji: '🔵', color: '#075985', bg: '#DBEAFE' },
+];
+
+// Colors for each score button 1-10
+const SCORE_COLORS = [null,'#94A3B8','#94A3B8','#38BDF8','#0EA5E9','#0EA5E9','#0284C7','#0284C7','#0369A1','#075985','#0C4A6E'];
+
+function scoreToZone(v) {
+  if (v <= 2) return ZONES[0];
+  if (v <= 5) return ZONES[1];
+  if (v <= 8) return ZONES[2];
+  return ZONES[3];
+}
+
+// Returns score normalized to 0-10 (v1 data was 1-4, v2 is 1-10)
+function getScore(assessment, key) {
+  const raw = assessment.ratings?.[key] || 0;
+  if (!raw) return 0;
+  if (!assessment.schemaV || assessment.schemaV < 2) return raw * 2.5;
+  return raw;
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
+const STORE_KEY = 'fourfours_v1';
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || { clients: {} }; }
+  catch { return { clients: {} }; }
+}
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+function getClient(store, id) { return store.clients[id]; }
+function upsertClient(store, id, name) {
+  if (!store.clients[id]) store.clients[id] = { id, name, createdAt: new Date().toISOString(), assessments: [] };
+  return store.clients[id];
+}
+function slugify(n) { return n.trim().toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,''); }
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = { clientId: null, currentRatings: {}, currentConfidence: {} };
+let charts = {};
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = ''; }, 3000);
+}
+
+// ─── ROUTER ──────────────────────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(`view-${id}`).classList.add('active');
+  const btn = document.querySelector(`#nav button[data-view="${id}"]`);
+  if (btn) btn.classList.add('active');
+  if (id === 'dashboard')  renderDashboard();
+  if (id === 'history')    renderHistory();
+  if (id === 'assessment') renderAssessment();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function catAvg(assessment, catId) {
+  const cat  = CATEGORIES.find(c => c.id === catId);
+  const vals = cat.items.map(it => getScore(assessment, `${catId}_${it.id}`)).filter(v => v > 0);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+}
+
+function levelInfo(avg) {
+  if (avg <= 0) return { label: 'Not rated', color: '#94A3B8' };
+  return scoreToZone(avg);
+}
+
+// Trend direction from last 3+ assessments
+function getTrend(sorted, catId) {
+  if (sorted.length < 3) return null;
+  const last3 = sorted.slice(-3).map(a => catAvg(a, catId));
+  const slope = (last3[2] - last3[0]) / 2;
+  if (slope >  0.4) return { label: '↑ Improving', color: '#10B981', bg: '#ECFDF5' };
+  if (slope < -0.4) return { label: '↓ Declining', color: '#EF4444', bg: '#FEF2F2' };
+  return { label: '→ Steady', color: '#F59E0B', bg: '#FFFBEB' };
+}
+
+function destroyChart(k) { if (charts[k]) { charts[k].destroy(); delete charts[k]; } }
+
+const CHART_SCALE_OPTS = {
+  y: {
+    min: 0, max: 10,
+    ticks: {
+      stepSize: 2.5,
+      color: '#94A3B8',
+      font: { size: 10 },
+      callback: v => ({ 0:'', 2.5:'🏖️ Beach', 5:'🏊 Swim', 7.5:'🤿 Snork', 10:'🔵 Diver' })[v] ?? ''
+    },
+    grid: { color: 'rgba(0,0,0,0.06)' },
+  },
+  x: {
+    ticks: { color: '#94A3B8', font: { size: 10 } },
+    grid: { color: 'rgba(0,0,0,0.04)' }
+  }
+};
+
+// ─── LOGIN ───────────────────────────────────────────────────────────────────
+function renderLogin() {
+  document.getElementById('new-client-input').value = '';
+}
+
+function loginAs(id) {
+  const store  = loadStore();
+  const client = store.clients[id];
+  if (!client) return;
+  state.clientId = id;
+  document.getElementById('app-header').style.display = '';
+  document.getElementById('client-name-display').textContent = client.name;
+  document.getElementById('view-login').classList.remove('active');
+  showView('dashboard');
+  if (state._welcomeMsg) {
+    setTimeout(() => toast(state._welcomeMsg, 'success'), 300);
+    delete state._welcomeMsg;
+  }
+}
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  const login = document.getElementById('new-client-input').value.trim();
+  if (!login) { toast('Please enter your login.', 'error'); return; }
+  const store = loadStore();
+  const id = slugify(login) || 'user_' + Date.now();
+  const isReturning = !!store.clients[id];
+  upsertClient(store, id, login);
+  saveStore(store);
+  state._welcomeMsg = isReturning ? `Welcome back, ${login}!` : `Profile created. Welcome, ${login}!`;
+  loginAs(id);
+});
+document.getElementById('new-client-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('start-btn').click();
+});
+document.getElementById('switch-client-btn').addEventListener('click', () => {
+  state.clientId = null;
+  document.getElementById('app-header').style.display = 'none';
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-login').classList.add('active');
+  renderLogin();
+});
+
+// ─── DASHBOARD ───────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const store       = loadStore();
+  const client      = getClient(store, state.clientId);
+  const assessments = client?.assessments || [];
+  const sorted      = [...assessments].sort((a,b) => a.date.localeCompare(b.date));
+
+  document.getElementById('dash-title').textContent = `Welcome back, ${client?.name || ''}`;
+
+  const noData  = document.getElementById('dash-no-data');
+  const content = document.getElementById('dash-content');
+  if (!assessments.length) { noData.style.display=''; content.style.display='none'; return; }
+  noData.style.display='none'; content.style.display='';
+
+  const latest = sorted.at(-1);
+
+  // Overview cards
+  const row = document.getElementById('overview-row');
+  row.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const avg = catAvg(latest, cat.id);
+    const ll  = levelInfo(avg);
+    const div = document.createElement('div');
+    div.className = 'overview-card';
+    div.style.setProperty('--c', cat.color);
+    div.innerHTML = `
+      <div class="ov-num" style="color:${cat.color}">${avg > 0 ? avg.toFixed(1) : '—'}</div>
+      <div class="ov-cat">${cat.label}</div>
+      <div class="ov-level" style="background:${cat.bg};color:${cat.color}">${ll.emoji ? ll.emoji + ' ' : ''}${ll.label}</div>`;
+    row.appendChild(div);
+  });
+
+  // Stat bars
+  const statsEl = document.getElementById('cat-stats');
+  statsEl.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const avg   = catAvg(latest, cat.id);
+    const pct   = (avg / 10) * 100;
+    const prev  = sorted.length > 1 ? catAvg(sorted.at(-2), cat.id) : null;
+    const delta = prev !== null ? +(avg - prev).toFixed(1) : null;
+    const trend = getTrend(sorted, cat.id);
+
+    const deltaHtml = delta !== null && delta !== 0
+      ? `<span style="font-size:0.7rem;color:${delta>0?'#10B981':'#EF4444'};margin-left:4px">${delta>0?'▲':'▼'} ${Math.abs(delta)}</span>`
+      : '';
+    const trendHtml = trend
+      ? `<span class="trend-badge" style="background:${trend.bg};color:${trend.color}">${trend.label}</span>`
+      : '';
+
+    statsEl.innerHTML += `
+      <div class="cat-stat">
+        <div class="cat-stat-top">
+          <span class="cat-stat-label" style="color:${cat.color}">${cat.label} ${trendHtml}</span>
+          <span class="cat-stat-val">${avg>0?avg.toFixed(1):'—'}/10${deltaHtml}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%;background:${cat.color}"></div>
+        </div>
+      </div>`;
+  });
+
+  // Radar chart
+  destroyChart('radar');
+  const radarCtx = document.getElementById('radar-chart').getContext('2d');
+  const datasets  = [{
+    label: 'Current',
+    data: CATEGORIES.map(c => catAvg(latest, c.id)),
+    backgroundColor: 'rgba(108,99,255,0.15)',
+    borderColor: '#6C63FF',
+    pointBackgroundColor: CATEGORIES.map(c => c.color),
+    pointBorderColor: '#fff',
+    pointRadius: 5, borderWidth: 2,
+  }];
+  if (sorted.length > 1) datasets.push({
+    label: 'Previous',
+    data: CATEGORIES.map(c => catAvg(sorted.at(-2), c.id)),
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    borderColor: 'rgba(0,0,0,0.2)',
+    borderDash: [4,4],
+    pointRadius: 3, borderWidth: 1.5,
+  });
+  charts['radar'] = new Chart(radarCtx, {
+    type: 'radar',
+    data: { labels: CATEGORIES.map(c => c.label), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: {
+        min: 0, max: 10,
+        ticks: { stepSize: 2.5, color: '#94A3B8', font: { size: 10 }, backdropColor: 'transparent',
+          callback: v => ({ 0:'',2.5:'🏖️',5:'🏊',7.5:'🤿',10:'🔵' })[v] ?? '' },
+        grid: { color: 'rgba(0,0,0,0.08)' },
+        pointLabels: { color: '#1E293B', font: { size: 12, weight: '700' } },
+        angleLines: { color: 'rgba(0,0,0,0.08)' },
+      }},
+      plugins: { legend: { labels: { color: '#64748B', font: { size: 11 }, boxWidth: 12 } } }
+    }
+  });
+
+  // Trend chart
+  destroyChart('trend');
+  charts['trend'] = new Chart(document.getElementById('trend-chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: sorted.map(a => new Date(a.date).toLocaleDateString()),
+      datasets: CATEGORIES.map(cat => ({
+        label: cat.label,
+        data: sorted.map(a => catAvg(a, cat.id)),
+        borderColor: cat.color, backgroundColor: cat.bg,
+        tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: CHART_SCALE_OPTS,
+      plugins: { legend: { labels: { color: '#64748B', font: { size: 11 }, boxWidth: 12 } } }
+    }
+  });
+
+  // Insights
+  renderInsights(sorted, document.getElementById('insights-row'));
+
+  // Recent list
+  const recentEl = document.getElementById('recent-list');
+  recentEl.innerHTML = '';
+  [...sorted].reverse().slice(0, 5).forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'recent-item';
+
+    const chips = CATEGORIES.map(cat => {
+      const avg = catAvg(a, cat.id);
+      return `<div class="ri-dot" style="background:${cat.bg};color:${cat.color}">${avg>0?avg.toFixed(1):'—'}</div>`;
+    }).join('');
+
+    const notesHtml = [
+      a.notesProgress ? `<div class="ri-note" style="background:#ECFDF5;color:#065F46"><span class="ri-note-label">✅</span>${esc(a.notesProgress)}</div>` : '',
+      a.notesStuck    ? `<div class="ri-note" style="background:#FFFBEB;color:#92400E"><span class="ri-note-label">🔄</span>${esc(a.notesStuck)}</div>`    : '',
+    ].filter(Boolean).join('');
+
+    const catsHtml = CATEGORIES.map(cat => {
+      const items = cat.items.map(it => {
+        const score = getScore(a, `${cat.id}_${it.id}`);
+        const zone  = score > 0 ? scoreToZone(score) : null;
+        const conf  = a.confidence?.[`${cat.id}_${it.id}`];
+        const confBadge = conf ? `<span style="font-size:0.65rem;padding:1px 4px;border-radius:3px;margin-left:3px;${
+          conf==='high'?'background:#ECFDF5;color:#065F46':conf==='medium'?'background:#E0F2FE;color:#0369A1':'background:#FEF3C7;color:#92400E'
+        }">${conf}</span>` : '';
+        return `<div class="ri-cat-item">
+          <span class="ri-cat-item-label">${it.label}</span>
+          <span class="ri-cat-item-val" style="background:${zone?zone.bg+'BB':'#F1F5F9'};color:${zone?zone.color:'#94A3B8'}">
+            ${score > 0 ? `${score.toFixed(score%1?1:0)} – ${zone.label}` : '—'}
+          </span>${confBadge}
+        </div>`;
+      }).join('');
+      const catNote = a.categoryNotes?.[cat.id];
+      const catNoteHtml = [
+        catNote?.progress ? `<div class="ri-cat-note" style="background:#ECFDF5;color:#065F46">✅ ${esc(catNote.progress)}</div>` : '',
+        catNote?.stuck    ? `<div class="ri-cat-note" style="background:#FFFBEB;color:#92400E">🔄 ${esc(catNote.stuck)}</div>`    : '',
+      ].filter(Boolean).join('');
+      return `<div>
+        <div class="ri-cat-title" style="color:${cat.color}">${cat.label}</div>
+        <div class="ri-cat-items">${items}${catNoteHtml}</div>
+      </div>`;
+    }).join('');
+
+    div.innerHTML = `
+      <div class="ri-top">
+        <div class="ri-left">
+          <span class="ri-date">${new Date(a.date).toLocaleString()}</span>
+          <span class="ri-toggle">Click to expand ▾</span>
+        </div>
+        <div class="ri-scores">${chips}</div>
+      </div>
+      <div class="ri-detail">
+        ${notesHtml ? `<div class="ri-notes">${notesHtml}</div>` : ''}
+        <div class="ri-cats">${catsHtml}</div>
+      </div>`;
+
+    div.addEventListener('click', () => {
+      const isExpanded = div.classList.toggle('expanded');
+      div.querySelector('.ri-toggle').textContent = isExpanded ? 'Click to collapse ▴' : 'Click to expand ▾';
+    });
+    recentEl.appendChild(div);
+  });
+}
+
+// ─── INSIGHTS ────────────────────────────────────────────────────────────────
+function renderInsights(sorted, containerEl) {
+  const latest = sorted.at(-1);
+  const prev   = sorted.length > 1 ? sorted.at(-2) : null;
+
+  const allItems = CATEGORIES.flatMap(cat => cat.items.map(it => {
+    const key      = `${cat.id}_${it.id}`;
+    const score    = getScore(latest, key);
+    const prevScore = prev ? getScore(prev, key) : null;
+    return { label: it.label, catLabel: cat.label, catColor: cat.color, score, prevScore,
+             delta: (prevScore !== null && score > 0 && prevScore > 0) ? score - prevScore : null };
+  }));
+
+  // Growth wins: biggest positive deltas
+  const wins = allItems.filter(it => it.delta !== null && it.delta > 0)
+    .sort((a,b) => b.delta - a.delta).slice(0, 3);
+
+  // Watch list: lowest rated items
+  const watchList = allItems.filter(it => it.score > 0)
+    .sort((a,b) => a.score - b.score).slice(0, 3);
+
+  const winsHtml = wins.length
+    ? wins.map(it => `
+        <div class="insight-item">
+          <div><div class="ii-label">${esc(it.label)}</div><div class="ii-sub" style="color:${it.catColor}">${esc(it.catLabel)}</div></div>
+          <div class="ii-badge" style="background:#ECFDF5;color:#065F46">+${it.delta.toFixed(1)} ↑</div>
+        </div>`).join('')
+    : `<div class="insight-empty">${sorted.length < 2 ? 'Complete a 2nd assessment to track growth wins.' : 'No gains since last assessment — keep going!'}</div>`;
+
+  const watchHtml = watchList.length
+    ? watchList.map(it => {
+        const zone = scoreToZone(it.score);
+        const deltaStr = it.delta !== null && it.delta !== 0
+          ? ` <span style="font-size:0.68rem;color:${it.delta>0?'#10B981':'#EF4444'}">${it.delta>0?'+':''}${it.delta.toFixed(1)}</span>` : '';
+        return `
+          <div class="insight-item">
+            <div><div class="ii-label">${esc(it.label)}</div><div class="ii-sub" style="color:${it.catColor}">${esc(it.catLabel)}</div></div>
+            <div class="ii-badge" style="background:${zone.bg};color:${zone.color}">${it.score.toFixed(1)} ${zone.emoji}${deltaStr}</div>
+          </div>`;
+      }).join('')
+    : `<div class="insight-empty">No data yet.</div>`;
+
+  containerEl.innerHTML = `
+    <div class="card">
+      <h3>🚀 Growth Wins</h3>
+      <div class="insight-list">${winsHtml}</div>
+    </div>
+    <div class="card">
+      <h3>👀 Watch List</h3>
+      <div class="insight-list">${watchHtml}</div>
+    </div>`;
+}
+
+// ─── ASSESSMENT ───────────────────────────────────────────────────────────────
+function renderAssessment() {
+  const form = document.getElementById('assess-form');
+  form.innerHTML = '';
+  state.currentRatings   = {};
+  state.currentConfidence = {};
+  document.getElementById('notes-progress').value = '';
+  document.getElementById('notes-stuck').value    = '';
+  updateProgress();
+
+  CATEGORIES.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'cat-section';
+
+    const itemRows = cat.items.map(item => {
+      const btnStrip = [1,2,3,4,5,6,7,8,9,10].map(n => {
+        const zoneStart = [3,6,9].includes(n) ? ' zone-start' : '';
+        return `<button class="score-btn${zoneStart}"
+          data-cat="${cat.id}" data-item="${item.id}" data-val="${n}"
+          style="--zone-color:${SCORE_COLORS[n]}"
+          title="${scoreToZone(n).emoji} ${scoreToZone(n).label}">${n}</button>`;
+      }).join('');
+
+      return `
+        <div class="item-row">
+          <div>
+            <div class="item-label">${item.label}</div>
+            <div class="item-sub">${item.sub}</div>
+          </div>
+          <div class="score-strip-wrap">
+            <div class="score-strip">${btnStrip}</div>
+            <div class="confidence-row" id="conf-${cat.id}-${item.id}">
+              <span class="conf-label">Confidence:</span>
+              <button class="conf-btn" data-cat="${cat.id}" data-item="${item.id}" data-conf="low">Low</button>
+              <button class="conf-btn" data-cat="${cat.id}" data-item="${item.id}" data-conf="medium">Med</button>
+              <button class="conf-btn" data-cat="${cat.id}" data-item="${item.id}" data-conf="high">High</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    section.innerHTML = `
+      <div class="cat-section-header" style="background:${cat.bg}; border-color:${cat.color}40;">
+        <div class="cat-num" style="background:${cat.color}">${cat.num}</div>
+        <h3 style="color:${cat.color}">${cat.label}</h3>
+      </div>
+      <div class="cat-section-body">
+        ${itemRows}
+        <div class="cat-notes-toggle" data-cat="${cat.id}">
+          📝 Notes for ${cat.label}
+          <span class="cnt-arrow">▾</span>
+        </div>
+        <div class="cat-notes-panel" id="cat-notes-${cat.id}">
+          <div class="cat-note-box progress">
+            <label style="color:#10B981">✅ Progress</label>
+            <textarea id="cnp-${cat.id}" placeholder="What's clicking in ${cat.label}?"></textarea>
+          </div>
+          <div class="cat-note-box stuck">
+            <label style="color:#F59E0B">🔄 Stuck</label>
+            <textarea id="cns-${cat.id}" placeholder="Where are you hitting friction here?"></textarea>
+          </div>
+        </div>
+      </div>`;
+
+    form.appendChild(section);
+  });
+}
+
+// Single delegated click handler for the assessment form (added once)
+document.getElementById('assess-form').addEventListener('click', e => {
+  const scoreBtn    = e.target.closest('.score-btn');
+  const confBtn     = e.target.closest('.conf-btn');
+  const notesToggle = e.target.closest('.cat-notes-toggle');
+
+  if (scoreBtn) {
+    const { cat, item, val } = scoreBtn.dataset;
+    state.currentRatings[`${cat}_${item}`] = parseInt(val);
+    scoreBtn.closest('.score-strip').querySelectorAll('.score-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.val === val);
+    });
+    document.getElementById(`conf-${cat}-${item}`)?.classList.add('visible');
+    updateProgress();
+  }
+
+  if (confBtn) {
+    const { cat, item, conf } = confBtn.dataset;
+    state.currentConfidence[`${cat}_${item}`] = conf;
+    confBtn.closest('.confidence-row').querySelectorAll('.conf-btn').forEach(b => {
+      b.className = 'conf-btn' + (b.dataset.conf === conf ? ` selected-${conf}` : '');
+    });
+  }
+
+  if (notesToggle) {
+    const catId = notesToggle.dataset.cat;
+    const panel = document.getElementById(`cat-notes-${catId}`);
+    panel?.classList.toggle('open');
+    notesToggle.querySelector('.cnt-arrow').textContent =
+      panel?.classList.contains('open') ? '▴' : '▾';
+  }
+});
+
+function updateProgress() {
+  const rated = Object.keys(state.currentRatings).length;
+  document.getElementById('assess-progress').style.width = Math.round((rated/16)*100) + '%';
+  document.getElementById('assess-progress-label').textContent = `${rated} of 16 rated`;
+  const note = document.getElementById('required-note');
+  note.textContent = rated < 16 ? `${16-rated} remaining` : '✓ All items rated!';
+  note.style.color  = rated === 16 ? '#10B981' : '#94A3B8';
+}
+
+document.getElementById('submit-assess-btn').addEventListener('click', () => {
+  const rated = Object.keys(state.currentRatings).length;
+  if (rated < 16) { toast(`Rate all 16 items. ${16-rated} remaining.`, 'error'); return; }
+
+  const categoryNotes = {};
+  CATEGORIES.forEach(cat => {
+    const p = document.getElementById(`cnp-${cat.id}`)?.value.trim() || '';
+    const s = document.getElementById(`cns-${cat.id}`)?.value.trim() || '';
+    if (p || s) categoryNotes[cat.id] = { progress: p, stuck: s };
+  });
+
+  const store  = loadStore();
+  const client = getClient(store, state.clientId);
+  client.assessments.push({
+    id: Date.now().toString(),
+    date: new Date().toISOString(),
+    schemaV: 2,
+    ratings:        { ...state.currentRatings },
+    confidence:     { ...state.currentConfidence },
+    categoryNotes,
+    notesProgress:  document.getElementById('notes-progress').value.trim(),
+    notesStuck:     document.getElementById('notes-stuck').value.trim(),
+  });
+  saveStore(store);
+  toast('Assessment saved! Great work.', 'success');
+  showView('dashboard');
+});
+
+document.getElementById('clear-assess-btn').addEventListener('click', renderAssessment);
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const store       = loadStore();
+  const client      = getClient(store, state.clientId);
+  const sorted      = [...(client?.assessments || [])].sort((a,b) => a.date.localeCompare(b.date));
+  const assessments = [...sorted].reverse();
+
+  destroyChart('historyTrend');
+  if (sorted.length) {
+    charts['historyTrend'] = new Chart(document.getElementById('history-trend-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: sorted.map(a => new Date(a.date).toLocaleDateString()),
+        datasets: CATEGORIES.map(cat => ({
+          label: cat.label,
+          data: sorted.map(a => catAvg(a, cat.id)),
+          borderColor: cat.color, backgroundColor: cat.bg,
+          tension: 0.35, fill: false, pointRadius: 4, borderWidth: 2,
+        }))
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { ...CHART_SCALE_OPTS, x: { ...CHART_SCALE_OPTS.x, ticks: { ...CHART_SCALE_OPTS.x.ticks, maxRotation: 30 } } },
+        plugins: { legend: { labels: { color: '#64748B', font: { size: 11 }, boxWidth: 12 } } }
+      }
+    });
+  }
+
+  destroyChart('historyBar');
+  if (sorted.length) {
+    const latest   = sorted.at(-1);
+    const allItems = CATEGORIES.flatMap(cat => cat.items.map(it => ({
+      label: it.label, catColor: cat.color,
+      val: getScore(latest, `${cat.id}_${it.id}`)
+    })));
+    charts['historyBar'] = new Chart(document.getElementById('bar-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: allItems.map(i => i.label),
+        datasets: [{ label: 'Score', data: allItems.map(i => i.val),
+          backgroundColor: allItems.map(i => i.catColor + 'AA'),
+          borderColor: allItems.map(i => i.catColor),
+          borderWidth: 1.5, borderRadius: 5 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          y: { min:0, max:10, ticks: { stepSize:2.5, color:'#94A3B8',
+            callback: v => ({ 0:'',2.5:'🏖️',5:'🏊',7.5:'🤿',10:'🔵' })[v] ?? '' },
+            grid: { color:'rgba(0,0,0,0.06)' } },
+          x: { ticks: { color:'#94A3B8', maxRotation:45, font:{size:10} }, grid: { display:false } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  const list = document.getElementById('history-list');
+  list.innerHTML = '';
+  if (!assessments.length) {
+    list.innerHTML = '<div class="card no-data"><h4>No assessments yet</h4><p>Complete your first assessment to see your history here.</p></div>';
+    return;
+  }
+
+  assessments.forEach((a, idx) => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+
+    const chips = CATEGORIES.map(cat => {
+      const avg = catAvg(a, cat.id);
+      return `<span class="score-chip" style="background:${cat.color}">${avg>0?avg.toFixed(1):'—'}</span>`;
+    }).join('');
+
+    const detail = CATEGORIES.map(cat => {
+      const items = cat.items.map(it => {
+        const score = getScore(a, `${cat.id}_${it.id}`);
+        const zone  = score > 0 ? scoreToZone(score) : null;
+        const conf  = a.confidence?.[`${cat.id}_${it.id}`];
+        const confBadge = conf ? `<span class="hc-conf" style="${
+          conf==='high'?'background:#ECFDF5;color:#065F46':conf==='medium'?'background:#E0F2FE;color:#0369A1':'background:#FEF3C7;color:#92400E'
+        }">${conf}</span>` : '';
+        return `<div class="hc-item">
+          <span class="hc-item-label">${it.label}</span>
+          <span style="display:flex;align-items:center;gap:2px">
+            <span class="hc-item-val" style="background:${zone?zone.bg+'BB':'#F1F5F9'};color:${zone?zone.color:'#94A3B8'}">
+              ${score > 0 ? `${score.toFixed(score%1?1:0)} – ${zone.label}` : '—'}
+            </span>${confBadge}
+          </span>
+        </div>`;
+      }).join('');
+
+      const catNote = a.categoryNotes?.[cat.id];
+      const catNoteHtml = [
+        catNote?.progress ? `<div class="hc-cat-note" style="background:#ECFDF5;color:#065F46">✅ ${esc(catNote.progress)}</div>` : '',
+        catNote?.stuck    ? `<div class="hc-cat-note" style="background:#FFFBEB;color:#92400E">🔄 ${esc(catNote.stuck)}</div>`    : '',
+      ].filter(Boolean).join('');
+
+      return `<div class="hc-cat">
+        <h4 style="color:${cat.color}">${cat.label}</h4>
+        <div class="hc-items">${items}${catNoteHtml}</div>
+      </div>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="hc-top">
+        <div>
+          <div class="hc-date">${idx===0?'<span style="background:var(--accent-bg);color:var(--accent);font-size:0.71rem;padding:1px 7px;border-radius:4px;margin-right:6px;font-weight:700;">Latest</span>':''}${new Date(a.date).toLocaleString()}</div>
+          ${a.notesProgress ? `<div class="hc-notes" style="color:#10B981">✅ ${esc(a.notesProgress)}</div>` : ''}
+          ${a.notesStuck    ? `<div class="hc-notes" style="color:#F59E0B">🔄 ${esc(a.notesStuck)}</div>`    : ''}
+        </div>
+        <div class="hc-scores">${chips}</div>
+      </div>
+      <div class="hc-detail"><div class="hc-cats">${detail}</div></div>`;
+
+    card.addEventListener('click', () => card.classList.toggle('expanded'));
+    list.appendChild(card);
+  });
+}
+
+// ─── NAV WIRING ──────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-view]').forEach(el => {
+  el.addEventListener('click', () => showView(el.dataset.view));
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderLogin();
+</script>
+</body>
+</html>
